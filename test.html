@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Apple Clock</title>
+</head>
+
+<body>
+
+
+    <div class="clock">
+        <div class="clock-face">
+            <div class="number">12</div>
+            <div class="number" style="transform: translate(57px,21px);">1</div>
+            <div class="number" style="transform: translate(105px,60px);">2</div>
+            <div class="number" style="transform: translate(125px,120px);">3</div>
+            <div class="number" style="transform: translate(102px,179px);">4</div>
+            <div class="number" style="transform: translate(60px,222px);">5</div>
+            <div class="number" style="transform: translate(0px,241px);">6</div>
+            <div class="number" style="transform: translate(-60px,222px);">7</div>
+            <div class="number" style="transform: translate(-102px,179px);">8</div>
+            <div class="number" style="transform: translate(-125px,120px);">9</div>
+            <div class="number" style="transform: translate(-105px,60px);">10</div>
+            <div class="number" style="transform: translate(-57px,21px);">11</div>
+            <div class="dot"></div>
+            <div class="hand min-hand"></div>
+            <div class="hand hour-hand"></div>
+            <div class="hand second-hand"></div>
+        </div>
+    </div>
+
+    <style>
+        html {
+            font-family: 'helvetica neue';
+            text-align: center;
+        }
+
+        body {
+            margin: 0;
+            display: flex;
+            flex: 1;
+            min-height: 100vh;
+            align-items: center;
+        }
+
+        .clock {
+            width: 300px;
+            height: 300px;
+            border-radius: 20%;
+            margin: auto;
+            background-color: black;
+        }
+
+        .clock-face {
+            position: relative;
+            top: 12.5px;
+            left: 12.5px;
+            width: 275px;
+            height: 275px;
+            border-radius: 100%;
+            background-color: white;
+        }
+
+        .number {
+            position: absolute;
+            top: 9px;
+            left: 129px;
+            width: 6%;
+            height: 6%;
+            font-size: bigger;
+            font-family: Arial, Helvetica, sans-serif;
+            font-weight: 600;
+        }
+
+        .dot {
+            position: relative;
+            top: 133.5px;
+            left: 133.5px;
+            background-color: black;
+            width: 8px;
+            height: 8px;
+            border-radius: 100%;
+        }
+
+        .hand {
+            width: 137.5px;
+            height: 3px;
+            background: rgb(245, 73, 5);
+            position: absolute;
+            margin-top: 128px;
+            margin-left: 8px;
+            transform-origin: 129.5px;
+            transform: rotate(0deg);
+            transition: all 1s;
+            transition-timing-function: linear;
+            border-radius: 80px;
+        }
+
+        .min-hand {
+            width: 130px;
+            background: black;
+            transform-origin: 100%;
+
+        }
+
+        .hour-hand {
+            width: 65px;
+            margin-left: 72.5px;
+            background: black;
+            transform-origin: 100%;
+
+        }
+    </style>
+
+    <script>
+        const secondHand = document.querySelector(".second-hand");
+        const minuteHand = document.querySelector(".min-hand");
+        const hourHand = document.querySelector(".hour-hand");
+
+        //console.log([secondHand]);
+        var secondAdjust = 0;
+        var minuteAdjust = 0;
+        var hourAdjust = 0;
+        function setDate() {
+            const nowtime = new Date();
+
+            const second = nowtime.getSeconds();
+            if (second === 0) secondAdjust += 1;
+            const secondRotation = 90 + 6 * second + 360 * secondAdjust;
+            secondHand.style.transform = `rotate(${secondRotation}deg)`;
+
+            const minute = nowtime.getMinutes();
+            if (minute === 0 && second === 0) minuteAdjust += 1;
+            const minuteRotation = 90 + 6 * minute + (second / 60) * 6 + 360 * minuteAdjust;
+            minuteHand.style.transform = `rotate(${minuteRotation}deg)`;
+
+            const hour = nowtime.getHours();
+            if ((hour === 0 || hour === 12) && minute === 0 && second === 0) hourAdjust += 1;
+            const hourRotation = 90 + 30 * hour + (minute / 60) * 30 + (second / 3600) * 30 + 360 * hourAdjust;
+            hourHand.style.transform = `rotate(${hourRotation}deg)`;
+        }
+        setInterval(setDate, 1000);
+        setDate();
+
+
+        //使用WebSocket连接后端socket服务  注意此处wss 可以理解为https  ws为http
+        socket = new WebSocket("http://101.43.4.104:8081/test")
+
+        //监听onopen 成功触发表示连接socket服务成功
+        socket.onopen = function () {
+            console.log("😄您已成功接入websocket服务,开始解决你的问题")
+            socket.send("")
+        }
+
+        //收到消息事件 gpt响应会不断触发onmessage事件，其事件对象中会有流失输出的内容
+        socket.onmessage = function (event) {
+            try {
+                const content = JSON.parse(event.data).content
+                console.log('😄gpt 响应内容为', content)
+            } catch (err) {
+                switch (event.data) {
+                    case "[INTERRUPTED]":
+                    case "[MODEL_TIMEOUT]":
+                    case "TEMPERATURE_THRESHOLD":
+                    case "[TOKENS]":
+                        console.log("😄gpt 响应中断或者超时")
+                        event.target.close()
+                        break
+                    case "[DONE]":
+                        console.log("😄gpt 响应结束了")
+                        event.target.close()
+                        break
+                    default:
+                        console.log("😄message error", err)
+                        break
+                }
+            }
+        }
+
+        //连接关闭事件
+        socket.onclose = function (event) {
+            console.log("😄您已断开")
+
+        }
+
+        //发生了错误事件
+        socket.onerror = function (e) {
+            console.log("连接错误，请联系开发者")
+        }
+    </script>
+</body>
+
+</html>

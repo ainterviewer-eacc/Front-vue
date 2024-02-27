@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket 测试</title>
+</head>
+
+<body>
+    <script>
+        const socket = new WebSocket("http://101.43.4.104:8081/test");
+
+        // 连接成功时触发
+        socket.onopen = function () {
+            console.log("😄 您已成功接入 WebSocket 服务，开始解决您的问题");
+            socket.send("");
+        };
+
+        // 接收到消息时触发
+        socket.onmessage = function (event) {
+            try {
+                const content = JSON.parse(event.data).content;
+                console.log('😄 GPT 响应内容为', content);
+            } catch (err) {
+                switch (event.data) {
+                    case "[INTERRUPTED]":
+                    case "[MODEL_TIMEOUT]":
+                    case "TEMPERATURE_THRESHOLD":
+                    case "[TOKENS]":
+                        console.log("😄 GPT 响应中断或超时");
+                        socket.close();
+                        break;
+                    case "[DONE]":
+                        console.log("😄 GPT 响应结束了");
+                        socket.close();
+                        break;
+                    default:
+                        console.log("😄 消息错误", err);
+                        break;
+                }
+            }
+        };
+
+        // 连接关闭时触发
+        socket.onclose = function (event) {
+            console.log("😄 您已断开");
+        };
+
+        // 发生错误时触发
+        socket.onerror = function (e) {
+            console.log("连接错误，请联系开发者");
+        };
+    </script>
+</body>
+
+</html>
