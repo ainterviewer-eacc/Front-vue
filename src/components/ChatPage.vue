@@ -63,24 +63,65 @@
                         loop: false,
                     });
                 });
+                // let aa = '';
+                // outputChatData(aa, '欢迎您，面试即将开始，请做好准备！');
                 // 获取问题
                 fetchChatData();
             });
+            
+            // var outputChatData = function(chatDataPush, contentSting) {
+            //     // 逐步输出聊天内容
+            //     let mm = '';
+            //     for (let i = 0; i < contentSting.length; i++) {
+            //         setTimeout(() => {
+            //             // console.log('ccccc', chatData.value[i]);
+            //             // chatDataPush = { type: 'bot', text: contentSting[i] };
+            //             mm += contentSting[i];
+            //             chatDataPush.value[0] = mm;
+            //             console.log('chatDataPush00000000:', mm);
+            //         }, i * 50); // 每隔0.05秒输出一条消息
+            //     }
+            // };
 
             // 发送HTTP GET请求获取问题
             // fetchChatData方法定义
             const fetchChatData = async () => {
                 isLoading.value = true; // 启动加载状态
                 try {
-                    chatData.value.push({ type: 'bot', text: '欢迎您，面试即将开始，请做好准备！' });
-                    chatData.value.push({ type: 'bot', text: '正在准备面试题。。。' });
-                    const session_id = router.currentRoute.value.params.session_id;
-                    const response = await axios.get(`http://101.43.4.104:8081/test`);
-                    const { question_id, interview_question, current_topic } = response.data.data;
-                    currentQuestionId.value = question_id;
-                    chatData.value.push({ type: 'bot', text: 'Question' + currentQuestionNumber.value + '主题：' + '“' + current_topic + '”'});
-                    chatData.value.push({ type: 'bot', text: interview_question });
-                    currentQuestionNumber.value++; // 增加题号
+                    // outputChatData(chatData, '欢迎您，面试即将开始，请做好准备！');
+                    chatData.value[0] = { type: 'bot', text: '欢迎您，我是mogo, 面试即将开始，请做好准备！' };
+                    chatData.value[1] = { type: 'bot', text: '正在准备面试题。。。' };
+                    chatData.value[2] = { type: 'bot', text: '请稍后' };
+
+                    
+                    let result_str = ""; // 初始化一个空字符串
+                    const results = function() {
+                fetch('http://101.43.4.104:8081/test',{ 
+                    method:'GET',
+                    })
+                    .then(response => {
+                        const decoder = new TextDecoder();
+                        const reader = response.body.getReader();
+
+                        function read() {
+                            reader.read().then(({ done, value }) => {
+                                if (done) {
+                                return;
+                                }
+                                result_str += decoder.decode(value);
+                                
+                                chatData.value[3] = { type: 'bot', text: result_str }
+                                read();
+                            });
+                        }
+
+                        read();
+                    })
+                    .catch(error => console.error(error));
+            };
+
+                    results();
+                    // currentQuestionNumber.value++; // 增加题号
                 } catch (error) {
                     console.error('请求第三个端口失败:', error);
                     // 可以在这里处理错误，例如显示错误消息
