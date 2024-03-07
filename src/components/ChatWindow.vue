@@ -115,7 +115,7 @@
 
     .bot-message {
         /* background-color: rgba(5, 5, 5, 0.05); */
-        background-color: rgba(100, 100, 100, 0.2);
+        background-color: rgba(235, 154, 79, 0.814);
         max-width: 66%;
         min-height: 24px;
         padding: 9px;

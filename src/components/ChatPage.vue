@@ -69,19 +69,7 @@
                 fetchChatData();
             });
             
-            // var outputChatData = function(chatDataPush, contentSting) {
-            //     // 逐步输出聊天内容
-            //     let mm = '';
-            //     for (let i = 0; i < contentSting.length; i++) {
-            //         setTimeout(() => {
-            //             // console.log('ccccc', chatData.value[i]);
-            //             // chatDataPush = { type: 'bot', text: contentSting[i] };
-            //             mm += contentSting[i];
-            //             chatDataPush.value[0] = mm;
-            //             console.log('chatDataPush00000000:', mm);
-            //         }, i * 50); // 每隔0.05秒输出一条消息
-            //     }
-            // };
+            const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
             // 发送HTTP GET请求获取问题
             // fetchChatData方法定义
@@ -89,12 +77,22 @@
                 isLoading.value = true; // 启动加载状态
                 try {
                     // outputChatData(chatData, '欢迎您，面试即将开始，请做好准备！');
-                    chatData.value[0] = { type: 'bot', text: '欢迎您，我是mogo, 面试即将开始，请做好准备！' };
-                    chatData.value[1] = { type: 'bot', text: '正在准备面试题。。。' };
+                    const text_1 = '亲爱的同学，欢迎您来到AI模拟面试间，我是mongo, 面试即将开始，请做好准备！'
+                    for (let i = 0; i < text_1.length; i++) {
+                            chatData.value[0] = { type: 'bot', text: text_1.substring(0, i + 1) };
+                            await delay(50);
+                    }
+                    // chatData.value[0] = { type: 'bot', text: '亲爱的同学，欢迎您来到AI模拟面试间，我是mongo, 面试即将开始，请做好准备！' };
+                    const text_2 = '正在准备面试题。。。'
+                    for (let i = 0; i < text_2.length; i++) {
+                            chatData.value[1] = { type: 'bot', text: text_2.substring(0, i + 1) };
+                            await delay(50);
+                    }
+                    // chatData.value[1] = { type: 'bot', text: '正在准备面试题。。。' };
                     chatData.value[2] = { type: 'bot', text: '请稍后' };
 
                     
-                    let result_str = ""; // 初始化一个空字符串
+                    let result_str = "第1题："; // 初始化一个空字符串
                     const results = function() {
                 fetch('http://101.43.4.104:8081/test',{ 
                     method:'GET',
